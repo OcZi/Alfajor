@@ -1,0 +1,22 @@
+plugins {
+    id('net.minecrell.plugin-yml.bukkit') version '0.5.1'
+}
+
+archivesBaseName = rootProject.getName() + '-example'
+
+dependencies {
+    implementation(project(':core'))
+    compileOnly 'org.spigotmc:spigot-api:1.8.8-R0.1-SNAPSHOT'
+    compileOnly 'com.viaversion:viaversion:4.4.2-SNAPSHOT'
+}
+
+bukkit {
+    name = 'Alfajor-Example'
+    description = 'Example of alfajor'
+    version = rootProject.version
+    main = 'me.oczi.alfajor.AlfajorPlugin'
+    author = 'OcZi'
+    apiVersion = '1.13'
+    depend = ['ViaVersion']
+    softDepend = ['ViaBackwards']
+}

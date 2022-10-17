@@ -1,0 +1,11 @@
+plugins {
+    id 'java'
+}
+
+description = "core"
+
+dependencies {
+    compileOnly 'com.viaversion:viaversion-api:4.4.2-SNAPSHOT'
+    compileOnly 'io.netty:netty-buffer:4.1.49.Final'
+    compileOnly 'io.netty:netty-parent:4.1.49.Final'
+}

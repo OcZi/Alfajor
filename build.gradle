@@ -1,0 +1,24 @@
+plugins {
+    id 'com.github.johnrengelman.shadow' version '7.1.2'
+}
+
+subprojects {
+    apply plugin: 'java'
+    apply plugin: 'maven-publish'
+    apply plugin: 'com.github.johnrengelman.shadow'
+
+    group 'me.oczi'
+    version '1.0-SNAPSHOT'
+
+    repositories {
+        mavenCentral()
+        maven { url 'https://hub.spigotmc.org/nexus/content/repositories/public/'}
+        maven { url 'https://repo.unnamed.team/repository/unnamed-public/' }
+        maven { url 'https://repo.viaversion.com' }
+    }
+
+    java {
+        project.sourceCompatibility = JavaVersion.VERSION_1_8
+        project.targetCompatibility = JavaVersion.VERSION_1_8
+    }
+}

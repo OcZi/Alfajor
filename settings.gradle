@@ -1,0 +1,3 @@
+rootProject.name = 'alfajor'
+
+include 'core', 'plugin-example'
