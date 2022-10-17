@@ -7,9 +7,12 @@ import com.viaversion.viaversion.libs.opennbt.tag.builtin.IntTag;
 import com.viaversion.viaversion.libs.opennbt.tag.builtin.StringTag;
 import com.viaversion.viaversion.protocols.protocol1_12to1_11_1.Protocol1_12To1_11_1;
 import com.viaversion.viaversion.protocols.protocol1_12to1_11_1.ServerboundPackets1_12;
+import com.viaversion.viaversion.protocols.protocol1_8.ClientboundPackets1_8;
 import com.viaversion.viaversion.protocols.protocol1_9_1_2to1_9_3_4.types.Chunk1_9_3_4Type;
 import com.viaversion.viaversion.protocols.protocol1_9_3to1_9_1_2.ClientboundPackets1_9_3;
 import com.viaversion.viaversion.protocols.protocol1_9_3to1_9_1_2.storage.ClientWorld;
+import com.viaversion.viaversion.protocols.protocol1_9to1_8.Protocol1_9To1_8;
+import com.viaversion.viaversion.protocols.protocol1_9to1_8.ServerboundPackets1_9;
 import me.oczi.alfajor.api.protocol.ProtocolHandle;
 import org.bukkit.plugin.java.JavaPlugin;
 
@@ -21,6 +24,13 @@ public class AlfajorPlugin extends JavaPlugin {
     @Override
     public void onEnable() {
         Protocol1_12To1_11_1 protocol = ViaAlfajor.getProtocol(Protocol1_12To1_11_1.class);
+        try {
+            ProtocolHandle<ClientboundPackets1_8, ServerboundPackets1_9> wrap = ProtocolHandle.wrap(ViaAlfajor.getProtocol(Protocol1_9To1_8.class));
+        } catch (NoSuchFieldException e) {
+            throw new RuntimeException(e);
+        } catch (IllegalAccessException e) {
+            throw new RuntimeException(e);
+        }
         try {
             handle = ProtocolHandle.wrap(protocol);
 

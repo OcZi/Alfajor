@@ -2,7 +2,7 @@ plugins {
     id 'java'
 }
 
-description = "core"
+description = "api"
 
 dependencies {
     compileOnly 'com.viaversion:viaversion-api:4.4.2-SNAPSHOT'
