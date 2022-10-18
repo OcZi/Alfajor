@@ -25,13 +25,6 @@ public class AlfajorPlugin extends JavaPlugin {
     public void onEnable() {
         Protocol1_12To1_11_1 protocol = ViaAlfajor.getProtocol(Protocol1_12To1_11_1.class);
         try {
-            ProtocolHandle<ClientboundPackets1_8, ServerboundPackets1_9> wrap = ProtocolHandle.wrap(ViaAlfajor.getProtocol(Protocol1_9To1_8.class));
-        } catch (NoSuchFieldException e) {
-            throw new RuntimeException(e);
-        } catch (IllegalAccessException e) {
-            throw new RuntimeException(e);
-        }
-        try {
             handle = ProtocolHandle.wrap(protocol);
 
             // We can't add a new remapper because it needs the chunk to read
