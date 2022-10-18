@@ -71,6 +71,6 @@ compileOnly('me.oczi.alfajor:Alfajor-api:1.0-SNAPSHOT')
 
 ## Build
 
-The entire project is built with JDK 8 using ViaVersion 4.4.2 as the target.
+The entire project is built with **JDK 8** using **ViaVersion 4.4.2** as the target.
 
 The API is licensed under [The MIT License](LICENSE) and the plugin example is under [GPL v3 License](plugin-example/LICENSE).
