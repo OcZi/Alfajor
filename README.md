@@ -14,20 +14,20 @@ public class DemoBukkitPlugin extends JavaPlugin {
         // Inject a PacketRemapper into spawn_mob remappers
         // It wouldn't override any registered remapper
         handle.injectClientbound(ClientboundPackets1_8.SPAWN_MOB,
-            wrapper -> {
+            remapper -> {
                 // Do whatever you want here
             });
         
         // Inject a remapper for serverbound packets
         handle.injectServerbound(ServerboundPackets1_9.VEHICLE_MOVE,
-            wrapper -> {
+            remapper -> {
                 //...
             }
         );
         
         // Inject a remapper overriding all the spawn_mob remappers.
         handle.injectOverrideClientbound(ClientboundPackets1_8.SPAWN_MOB,
-            wrapper -> {
+            remapper -> {
                 // ...
             });
     }
