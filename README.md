@@ -44,6 +44,12 @@ that support it with a 1.8.8 server base.
 ### Maven:
 
 ```xml
+<repositories>
+    <repository>
+        <id>unnamed-snapshots</id>
+        <url>https://repo.unnamed.team/repository/unnamed-snapshots/</url>
+    </repository>
+</repositories>
 
 <dependency>
     <groupId>me.oczi.alfajor</groupId>
@@ -56,6 +62,10 @@ that support it with a 1.8.8 server base.
 ### Gradle:
 
 ```groovy
+repositories {
+    maven { url 'https://repo.unnamed.team/repository/unnamed-snapshots/' }
+}
+
 compileOnly('me.oczi.alfajor:Alfajor-api:1.0-SNAPSHOT')
 ```
 
