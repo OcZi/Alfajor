@@ -2,10 +2,33 @@ plugins {
     id 'java'
 }
 
-description = "api"
+var fileName = rootProject.getName() + '-api';
+archivesBaseName = fileName;
 
 dependencies {
     compileOnly 'com.viaversion:viaversion-api:4.4.2-SNAPSHOT'
     compileOnly 'io.netty:netty-buffer:4.1.49.Final'
     compileOnly 'io.netty:netty-parent:4.1.49.Final'
+}
+
+publishing {
+    publications {
+        maven(MavenPublication) {
+            from components.java
+
+            pom {
+                artifactId = fileName
+            }
+        }
+    }
+    repositories {
+        maven {
+            name 'unnamed-snapshots'
+            url 'https://repo.unnamed.team/repository/unnamed-snapshots/'
+            credentials {
+                username = unnamedRepoUser
+                password = unnamedRepoPassword
+            }
+        }
+    }
 }

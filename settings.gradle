@@ -1,3 +1,5 @@
-rootProject.name = 'alfajor'
+rootProject.name = 'Alfajor'
 
-include 'api', 'plugin-example'
+['api', 'plugin-example'].forEach {
+    include it
+}
