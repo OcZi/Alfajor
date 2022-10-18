@@ -2,9 +2,12 @@ package me.oczi.alfajor;
 
 import com.viaversion.viaversion.api.Via;
 import com.viaversion.viaversion.api.ViaManager;
+import com.viaversion.viaversion.api.connection.UserConnection;
 import com.viaversion.viaversion.api.protocol.Protocol;
 import com.viaversion.viaversion.api.protocol.ProtocolManager;
 import com.viaversion.viaversion.api.protocol.version.ProtocolVersion;
+
+import java.util.UUID;
 
 
 public interface ViaAlfajor {
@@ -23,5 +26,9 @@ public interface ViaAlfajor {
 
     static Protocol<?, ?, ?, ?> getProtocol(ProtocolVersion client, ProtocolVersion server) {
         return protocolManager().getProtocol(client, server);
+    }
+
+    static UserConnection getConnection(UUID uuid) {
+        return Via.getAPI().getConnection(uuid);
     }
 }
