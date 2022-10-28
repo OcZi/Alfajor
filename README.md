@@ -54,7 +54,7 @@ that support it with a 1.8.8 server base.
 <dependency>
     <groupId>me.oczi.alfajor</groupId>
     <artifactId>Alfajor-api</artifactId>
-    <version>1.0-SNAPSHOT</version>
+    <version>1.1-SNAPSHOT</version>
     <scope>compile</scope>
 </dependency>
 ```
@@ -66,7 +66,7 @@ repositories {
     maven { url 'https://repo.unnamed.team/repository/unnamed-snapshots/' }
 }
 
-compileOnly('me.oczi.alfajor:Alfajor-api:1.0-SNAPSHOT')
+compileOnly('me.oczi.alfajor:Alfajor-api:1.1-SNAPSHOT')
 ```
 
 ## Build
