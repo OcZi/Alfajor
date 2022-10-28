@@ -3,25 +3,41 @@ package me.oczi.alfajor.api.protocol;
 import com.viaversion.viaversion.api.protocol.AbstractProtocol;
 import com.viaversion.viaversion.api.protocol.Protocol;
 import com.viaversion.viaversion.api.protocol.packet.ClientboundPacketType;
+import com.viaversion.viaversion.api.protocol.packet.PacketType;
 import com.viaversion.viaversion.api.protocol.packet.ServerboundPacketType;
 import com.viaversion.viaversion.api.protocol.remapper.PacketRemapper;
 
 import java.lang.reflect.Field;
 import java.util.Map;
+import java.util.Objects;
+
+import static com.viaversion.viaversion.api.protocol.AbstractProtocol.*;
 
 public class ProtocolHandleImpl<C extends ClientboundPacketType, S extends ServerboundPacketType>
     implements ProtocolHandle<C, S> {
     private final Protocol<C, ?, ?, S> baseProtocol;
 
-    private final Map<AbstractProtocol.Packet, AbstractProtocol.ProtocolPacket> serverbound;
-    private final Map<AbstractProtocol.Packet, AbstractProtocol.ProtocolPacket> clientbound;
+    private final Map<Packet, ProtocolPacket> serverbound;
+    private final Map<Packet, ProtocolPacket> clientbound;
+
+    private final Class<C> oldClientbound;
+    private final Class<? extends ClientboundPacketType> newClientbound;
+    private final Class<? extends ServerboundPacketType> oldServerbound;
+    private final Class<S> newServerbound;
 
     public ProtocolHandleImpl(Protocol<C, ?, ?, S> protocol) throws NoSuchFieldException, IllegalAccessException {
         this.baseProtocol = protocol;
 
-        Class<AbstractProtocol<?, ?, ?, ?>> abstractProtocol = getAbstractProtocol(protocol.getClass());
-        serverbound = getFieldValue(protocol, abstractProtocol, "serverbound");
-        clientbound = getFieldValue(protocol, abstractProtocol, "clientbound");
+        // Iterate all superclasses to get abstract protocol
+        Class<AbstractProtocol<?, ?, ?, ?>> superClass = getAbstractProtocol(protocol.getClass());
+        // Here is the trick; obtain clientbound/serverbound maps to interact within
+        serverbound = getFieldValue(protocol, superClass, "serverbound");
+        clientbound = getFieldValue(protocol, superClass, "clientbound");
+
+        oldClientbound = getFieldValue(protocol, superClass, "oldClientboundPacketEnum");
+        newClientbound = getFieldValue(protocol, superClass, "newClientboundPacketEnum");
+        oldServerbound = getFieldValue(protocol, superClass, "oldServerboundPacketEnum");
+        newServerbound = getFieldValue(protocol, superClass, "newServerboundPacketEnum");
     }
 
     @SuppressWarnings("unchecked")
@@ -42,84 +58,86 @@ public class ProtocolHandleImpl<C extends ClientboundPacketType, S extends Serve
 
     @Override
     public ProtocolHandle<C, S> injectClientbound(C type, RemapperInjector injector) {
-        AbstractProtocol.Packet packet = new AbstractProtocol.Packet(type.state(), type.getId());
-        AbstractProtocol.ProtocolPacket protocolPacket = clientbound.get(packet);
-        PacketRemapper remapper = protocolPacket.getRemapper();
-        if (remapper == null) {
-            remapper = new PacketRemapper() {
-                @Override
-                public void registerMap() {
-                    injector.inject(this);
-                }
-            };
-            protocolPacket = new AbstractProtocol.ProtocolPacket(protocolPacket.getState(),
-                protocolPacket.getUnmappedPacketType(),
-                protocolPacket.getMappedPacketType(),
-                remapper);
-            clientbound.put(packet, protocolPacket);
-        } else {
-            injector.inject(remapper);
-        }
-        return this;
+        return injectPacket(type, injector, true, false);
     }
 
     @Override
-    public ProtocolHandle<C, S> injectOverrideClientbound(C type, RemapperInjector handler) {
-        AbstractProtocol.Packet packet = new AbstractProtocol.Packet(type.state(), type.getId());
-        AbstractProtocol.ProtocolPacket protocolPacket = clientbound.get(packet);
-        PacketRemapper remapper = new PacketRemapper() {
-            @Override
-            public void registerMap() {
-                handler.inject(this);
-            }
-        };
-        protocolPacket = new AbstractProtocol.ProtocolPacket(protocolPacket.getState(),
-            protocolPacket.getUnmappedPacketType(),
-            protocolPacket.getMappedPacketType(),
-            remapper);
-        clientbound.put(packet, protocolPacket);
-        return this;
+    public ProtocolHandle<C, S> injectOverrideClientbound(C type, RemapperInjector injector) {
+        return injectPacket(type, injector, true, true);
     }
 
     @Override
     public ProtocolHandle<C, S> injectServerbound(S type, RemapperInjector injector) {
-        AbstractProtocol.Packet packet = new AbstractProtocol.Packet(type.state(), type.getId());
-        AbstractProtocol.ProtocolPacket protocolPacket = serverbound.get(packet);
-        PacketRemapper remapper = protocolPacket.getRemapper();
-        if (remapper == null) {
+        return injectPacket(type, injector, false, false);
+    }
+
+    @Override
+    public ProtocolHandle<C, S> injectOverrideServerbound(S type, RemapperInjector injector) {
+        return injectPacket(type, injector, false, true);
+    }
+
+    private ProtocolHandle<C, S> injectPacket(PacketType packetType,
+                                              RemapperInjector injector,
+                                              boolean client,
+                                              boolean override) {
+        Packet packet = new Packet(packetType.state(), packetType.getId());
+        Map<Packet, ProtocolPacket> base = client ? clientbound : serverbound;
+        ProtocolPacket protocolPacket = base.get(packet);
+        PacketRemapper remapper = protocolPacket == null ? null : protocolPacket.getRemapper();
+        if (override || remapper == null) {
             remapper = new PacketRemapper() {
                 @Override
                 public void registerMap() {
                     injector.inject(this);
                 }
             };
-            protocolPacket = new AbstractProtocol.ProtocolPacket(protocolPacket.getState(),
-                protocolPacket.getUnmappedPacketType(),
-                protocolPacket.getMappedPacketType(),
-                remapper);
-            serverbound.put(packet, protocolPacket);
+            if (protocolPacket == null) {
+                protocolPacket = new ProtocolPacket(packetType.state(),
+                    packetType,
+                    findMappedType(packetType, client),
+                    remapper);
+            } else {
+                protocolPacket = new ProtocolPacket(protocolPacket.getState(),
+                    Objects.requireNonNull(protocolPacket.getUnmappedPacketType(),
+                        "Unmapped packet is null (packet using legacy constructor?)"),
+                    protocolPacket.getMappedPacketType(),
+                    remapper);
+            }
         } else {
             injector.inject(remapper);
         }
+        base.put(packet, protocolPacket);
         return this;
     }
 
-    @Override
-    public ProtocolHandle<C, S> injectOverrideServerbound(S type, RemapperInjector injector) {
-        AbstractProtocol.Packet packet = new AbstractProtocol.Packet(type.state(), type.getId());
-        AbstractProtocol.ProtocolPacket protocolPacket = serverbound.get(packet);
-        PacketRemapper remapper = new PacketRemapper() {
-            @Override
-            public void registerMap() {
-                injector.inject(this);
+    @SuppressWarnings("unchecked")
+    private PacketType findMappedType(PacketType type, boolean client) {
+        String name = type.getName();
+        Class<? extends Enum<? extends PacketType>> enumClass;
+        if (client) {
+            if (newClientbound == oldClientbound) {
+                return type;
             }
-        };
-        protocolPacket = new AbstractProtocol.ProtocolPacket(protocolPacket.getState(),
-            protocolPacket.getUnmappedPacketType(),
-            protocolPacket.getMappedPacketType(),
-            remapper);
-        serverbound.put(packet, protocolPacket);
-        return this;
+
+            enumClass = (Class<? extends Enum<? extends PacketType>>) newClientbound;
+        } else {
+            if (newServerbound == oldServerbound) {
+                return type;
+            }
+
+            enumClass = (Class<? extends Enum<? extends PacketType>>) oldServerbound;
+        }
+
+        for (Enum<? extends PacketType> constant : enumClass.getEnumConstants()) {
+            String constantName = constant.name();
+            if (constantName.equals(name)) {
+                return (PacketType) constant;
+            }
+        }
+
+        throw new IllegalArgumentException(
+            "Packet " + name + " in " + baseProtocol.getClass().getSimpleName()
+                + " could not be automatically mapped!");
     }
 
     @Override
