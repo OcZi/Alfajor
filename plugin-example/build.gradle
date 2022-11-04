@@ -6,6 +6,7 @@ archivesBaseName = rootProject.getName() + '-example'
 
 dependencies {
     implementation(project(':api'))
+    compileOnly 'io.netty:netty-buffer:4.1.49.Final'
     compileOnly 'org.spigotmc:spigot-api:1.8.8-R0.1-SNAPSHOT'
     compileOnly 'com.viaversion:viaversion:4.4.2-SNAPSHOT'
 }
