@@ -2,7 +2,6 @@
 A ViaVersion hack library to intercept and override packet mappers of specific protocols.
 
 ## Example code
-
 ```java
 public class DemoBukkitPlugin extends JavaPlugin {
 
@@ -34,7 +33,11 @@ public class DemoBukkitPlugin extends JavaPlugin {
     }
 }
 ```
-
+**Note:**
+- PacketRemapper needs to map their fields
+- Be careful with adding remappers; fields and objects might already be consumed and will throw an exception
+  
+  
 There is a [plugin example](https://github.com/OcZi/Alfajor/tree/master/plugin-example) of coloured beds for clients
 that support it with a 1.8.8 server base.
 ![](https://media.discordapp.net/attachments/516845390079983618/1031656619144130661/unknown.png?width=883&height=452)
